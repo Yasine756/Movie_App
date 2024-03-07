@@ -1,11 +1,31 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { firebaseAuth } from '../utils/firbase_config'
 import styled from 'styled-components'
 import BackgroundImage from '../components/backgroundImage'
 import Header from '../components/Header'
 
 function Signup() {
+  const [showPassword, setShowPassword] = useState(false)
+  const [formValues, setFormValues] = useState({
+    email: '',
+    password: '',
+  })
+  const HandelSignUp = async () => {
+    try {
+      const { email, password } = formValues
+      await createUserWithEmailAndPassword(firebaseAuth, email, password)
+      
+    } catch (err) {
+      console.log(err)
+    }
+    setFormValues({
+      email: '',
+      password: '',
+    });
+  }
   return (
-    <Container>
+    <Container showPassword={showPassword}>
       <BackgroundImage />
       <div className="content">
         <Header login />
@@ -14,15 +34,37 @@ function Signup() {
             <h1>Unlimited Movies , TV shows and more</h1>
             <h4>Watch anywhere .Cancel anytime</h4>
             <h6>
-              Ready to watch ? Enter your email to create or restart membership
+              Ready to watch ? Enter your email to create or restart membership{' '}
             </h6>
           </div>
           <div className="form">
-            <input type="email" placeholder="Email Adress" name="email" />
-            <input type="password" placeholder="Password" name="password" />
-            <button>Get started</button>
+            <input
+              type="email"
+              placeholder="Email Adress"
+              name="email"
+              value={formValues.email}
+              onChange={(e) =>
+                setFormValues({ ...formValues, email: e.target.value })
+              }
+            />
+
+            {showPassword && (
+              <input
+                type="password"
+                placeholder="Password"
+                name="password"
+                value={formValues.password}
+                onChange={(e) =>
+                  setFormValues({ ...formValues, password: e.target.value })
+                }
+              />
+            )}
+
+            {!showPassword && (
+              <button onClick={() => setShowPassword(true)}>Get started</button>
+            )}
           </div>
-          <button>Log In</button>
+          <button onClick={HandelSignUp}>Sign Up</button>
         </div>
       </div>
     </Container>
@@ -54,6 +96,8 @@ const Container = styled.div`
       }
       .form {
         display: grid;
+        grid-template-columns: ${({ showPassword }) =>
+          showPassword ? '1fr 1fr' : '2fr 1fr'};
         width: 60%;
         input {
           color: black;
